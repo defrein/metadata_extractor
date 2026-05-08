@@ -169,8 +169,55 @@ def find_pages(text: str) -> Tuple[Optional[str], Optional[str]]:
     m = PAGES_RE.search(text)
     if m:
         return m.group(1), m.group(2)
-    # plain "134-190" patterns near "pp" or near a year line — too noisy alone, skip
+    # Indonesian/general header pattern: "...Tahun 2023 E-ISSN: xxxx-xxxx 102"
+    # or "Vol 5 No 2 ... 102" — capture the trailing 1-4 digit page number
+    m = re.search(
+        r"(?:Tahun\s+\d{4}|Year\s+\d{4})\b[^\n]{0,80}?\b(\d{1,4})\s*$",
+        text, re.IGNORECASE | re.MULTILINE,
+    )
+    if m:
+        return m.group(1), None
+    m = re.search(
+        r"E[-\s]?ISSN\s*[:\-]?\s*\d{4}-\d{3}[\dXx]\s+(\d{1,4})\b",
+        text, re.IGNORECASE,
+    )
+    if m:
+        return m.group(1), None
     return None, None
+
+
+def find_issue_year(text: str) -> Optional[str]:
+    """Issue year from 'Tahun YYYY' / 'Year YYYY' / '(YYYY)'."""
+    m = re.search(r"\b(?:Tahun|Year)\s+(\d{4})\b", text, re.IGNORECASE)
+    if m:
+        return m.group(1)
+    m = re.search(r"\((19|20)(\d{2})\)", text)
+    if m:
+        return m.group(1) + m.group(2)
+    return None
+
+
+def clean_email(addr: str) -> str:
+    """Strip leading superscript digits/markers from an email local part."""
+    return re.sub(r"^[\d\*†‡§¶]+", "", addr).strip()
+
+
+def parse_email_supers(text: str) -> List[Tuple[Optional[int], str]]:
+    """Return list of (superscript_index_or_None, cleaned_email)."""
+    out: List[Tuple[Optional[int], str]] = []
+    seen = set()
+    for raw in EMAIL_RE.findall(text):
+        m = re.match(r"^(\d+)(.+)$", raw)
+        if m:
+            idx = int(m.group(1))
+            addr = m.group(2)
+        else:
+            idx, addr = None, raw
+        if addr.lower() in seen:
+            continue
+        seen.add(addr.lower())
+        out.append((idx, addr))
+    return out
 
 
 def find_keywords(text: str) -> List[str]:
@@ -247,7 +294,8 @@ def extract_rule_based(text: str) -> Dict[str, object]:
     doi = find_doi(text)
     issn_print, issn_online = find_issns(text)
     first_page, last_page = find_pages(text)
-    emails = find_emails(text)
+    email_supers = parse_email_supers(text)
+    emails = [addr for _, addr in email_supers]
     orcids = find_orcids(text)
     keywords = find_keywords(text)
     abstract = find_abstract(text)
@@ -263,9 +311,11 @@ def extract_rule_based(text: str) -> Dict[str, object]:
         "issnOnline": issn_online or "",
         "volume": find_volume(text) or "",
         "issue": find_issue(text) or "",
+        "issueYear": find_issue_year(text) or "",
         "firstPage": first_page or "",
         "lastPage": last_page or "",
         "emails": emails,
+        "emailsBySuper": email_supers,
         "orcids": orcids,
         "keywords": keywords,
         "abstract": abstract or "",

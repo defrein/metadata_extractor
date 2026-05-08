@@ -176,54 +176,139 @@ class CRFExtractor:
         doc: PdfDocument,
         tokens: List[Tuple[str, Dict[str, float]]],
     ) -> Dict[str, List[str]]:
-        """Layout-only fallback: largest-font line on page 0 = title;
-        next bold/title-cased lines = authors; lines containing
-        'University|Departement|Institute' = affiliations; line starting
-        with a journal-ish header on top of page 0 = journal title.
+        """Layout-only fallback for journals (incl. Indonesian).
+
+        Strategy:
+          1. Drop journal-header lines (ISSN / Vol / Tahun / page-number-only).
+          2. Title = consecutive lines sharing the largest non-header font.
+          3. Journal title = lines above ISSN/Vol header, joined.
+          4. After title:
+               - lines that look like names (with optional superscript) → AUTHOR
+               - first line matching Fakultas/Universitas/Department/Jl./...
+                 starts the AFFIL block; AFFIL continues until email/abstract.
         """
         groups: Dict[str, List[str]] = {label: [] for label in LABELS}
         page0 = [ln for ln in doc.lines if ln.page == 0]
         if not page0:
             return groups
-        # journal title: top-most line, often italic/bold and title-cased
-        top_line = min(page0, key=lambda l: l.bbox[1] if l.bbox else 0)
-        if top_line.text and len(top_line.text) < 120:
-            groups["JOURNAL"].append(top_line.text)
 
-        # title: largest font in the upper half of page 0
-        upper = [ln for ln in page0 if (ln.bbox[1] if ln.bbox else 0) < 500]
-        if upper:
-            biggest = max(upper, key=lambda l: l.size)
-            title_lines = [l for l in upper if abs(l.size - biggest.size) < 0.5]
-            title_text = " ".join(l.text for l in title_lines)
+        page0 = sorted(page0, key=lambda l: (l.bbox[1] if l.bbox else 0))
+
+        header_re = re.compile(
+            r"\b(?:ISSN|P[\-\s]?ISSN|E[\-\s]?ISSN|Vol(?:ume)?\.?\s*\d|"
+            r"No\.?\s*\d|Tahun\s*\d{4}|Year\s*\d{4})\b",
+            re.IGNORECASE,
+        )
+        affil_re = re.compile(
+            r"\b(Fakultas|Universitas|Department|Departement|University|"
+            r"Institute|Institut|Faculty|Sekolah\s+Tinggi|Politeknik|Akademi|"
+            r"Jl\.|Jalan\s|Kampus)\b",
+            re.IGNORECASE,
+        )
+        abstract_re = re.compile(r"^\s*(abstract|abstrak)\b", re.IGNORECASE)
+        keyword_re = re.compile(r"^\s*(keywords?|kata\s+kunci)\b", re.IGNORECASE)
+
+        def is_header(text: str) -> bool:
+            t = text.strip()
+            if not t:
+                return True
+            if t.isdigit() and len(t) <= 4:
+                return True
+            return bool(header_re.search(t))
+
+        body = [ln for ln in page0 if not is_header(ln.text)]
+        if not body:
+            return groups
+
+        # Journal title: lines that appear ABOVE the first header line
+        first_header_y = None
+        for ln in page0:
+            if header_re.search(ln.text):
+                first_header_y = ln.bbox[1] if ln.bbox else 0
+                break
+        if first_header_y is not None:
+            above = [ln for ln in body if (ln.bbox[1] or 0) < first_header_y]
+            if above:
+                jt = " ".join(l.text for l in above).strip()
+                jt = re.sub(r"\s+", " ", jt)
+                if 3 < len(jt) < 200:
+                    groups["JOURNAL"].append(jt)
+
+        # Title: consecutive lines sharing the largest font in body
+        max_size = max(ln.size for ln in body)
+        title_lines = [ln for ln in body if abs(ln.size - max_size) < 0.4]
+        # keep only the first contiguous run of same-size lines (by y order)
+        if title_lines:
+            ordered = sorted(title_lines, key=lambda l: l.bbox[1] or 0)
+            run = [ordered[0]]
+            for prev, cur in zip(ordered, ordered[1:]):
+                gap = (cur.bbox[1] or 0) - (prev.bbox[3] or prev.bbox[1] or 0)
+                if gap < (cur.size or 12) * 2.5:
+                    run.append(cur)
+                else:
+                    break
+            title_text = " ".join(l.text for l in run).strip()
+            title_text = re.sub(r"\s+", " ", title_text)
             if title_text:
-                groups["TITLE"].append(title_text.strip())
+                groups["TITLE"].append(title_text)
+            title_end_y = max((l.bbox[3] or l.bbox[1] or 0) for l in run)
+        else:
+            title_end_y = 0
 
-            # authors: title-cased lines just below biggest
-            biggest_y = biggest.bbox[1] if biggest.bbox else 0
-            below = [l for l in upper if (l.bbox[1] if l.bbox else 0) > biggest_y]
-            for l in below[:8]:
-                t = l.text.strip(" ,;.")
-                if not t:
-                    continue
-                if any(k in t.lower() for k in ["university", "universitas",
-                                                "department", "departement",
-                                                "institute", "institut",
-                                                "faculty", "fakultas"]):
-                    groups["AFFIL"].append(t)
-                elif _looks_like_author(t):
-                    groups["AUTHOR"].append(t)
+        # Below the title: authors → affiliations → abstract
+        below = [ln for ln in body if (ln.bbox[1] or 0) > title_end_y]
+        author_lines: List[str] = []
+        affil_lines: List[str] = []
+        in_affil = False
+        for ln in below:
+            t = ln.text.strip()
+            if not t:
+                continue
+            if abstract_re.match(t) or keyword_re.match(t):
+                break
+            if "@" in t:  # email block — stop both
+                break
+            if affil_re.search(t):
+                in_affil = True
+            if in_affil:
+                affil_lines.append(t)
+                continue
+            if _looks_like_author(t):
+                author_lines.append(t)
+            else:
+                # if we already saw authors and this is unusual, stop
+                if author_lines:
+                    break
+
+        if author_lines:
+            groups["AUTHOR"].extend(author_lines)
+        if affil_lines:
+            groups["AFFIL"].append(" ".join(affil_lines))
+
         return groups
 
 
 def _looks_like_author(line: str) -> bool:
-    if not line or len(line) > 120:
+    """Heuristic: line is one or more title-cased name groups separated by
+    commas / 'and' / '&', possibly with superscript digit/symbol markers.
+    """
+    if not line or len(line) > 240:
         return False
-    # remove superscript markers
-    cleaned = re.sub(r"[\d\*†‡§¶,;]+", " ", line).strip()
-    parts = [p for p in cleaned.split() if p]
-    if len(parts) < 2 or len(parts) > 6:
+    if any(kw in line.lower() for kw in [
+        "abstract", "abstrak", "keyword", "kata kunci",
+        "introduction", "pendahuluan", "fakultas", "universitas",
+        "university", "department", "departement", "faculty",
+        "institute", "institut", "jl.", "jalan ", "@",
+    ]):
         return False
-    if not all(p[0].isupper() for p in parts if p[0].isalpha()):
-        return False
-    return True
+    # Strip superscript markers and split into name groups
+    stripped = re.sub(r"[\d\*†‡§¶]+", " ", line)
+    groups = re.split(r",|\band\b|;|&", stripped, flags=re.IGNORECASE)
+    valid = 0
+    for g in groups:
+        parts = [p for p in g.strip().split() if p]
+        if 2 <= len(parts) <= 5 and all(
+            p[0].isupper() for p in parts if p[0].isalpha()
+        ):
+            valid += 1
+    return valid >= 1
