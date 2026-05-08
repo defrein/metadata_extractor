@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Journal Metadata Extractor{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    pre { font-family: 'JetBrains Mono', 'Fira Code', Menlo, monospace; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <header class="bg-white border-b border-slate-200">
+    <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-semibold">J</div>
+        <div>
+          <div class="font-semibold">Journal Metadata Extractor</div>
+          <div class="text-xs text-slate-500">CRF + Rule-based · spaCy · PyMuPDF</div>
+        </div>
+      </a>
+      <nav class="text-sm text-slate-500">
+        <a href="/" class="hover:text-indigo-600">Home</a>
+      </nav>
+    </div>
+  </header>
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="max-w-5xl mx-auto px-4 py-8 text-xs text-slate-400">
+    Extracts title, authors, affiliations, DOI, ISSN, dates, keywords, abstract, license &amp; copyright from scientific PDFs.
+  </footer>
+</body>
+</html>

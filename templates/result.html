@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Result · {{ filename }}{% endblock %}
+{% block content %}
+<section>
+  <div class="flex items-start justify-between gap-4 mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">Extracted metadata</h1>
+      <p class="text-slate-500 text-sm mt-1">
+        File: <span class="font-medium text-slate-700">{{ filename }}</span>
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <a href="/download/{{ job_id }}"
+         class="inline-flex items-center gap-1 rounded-lg bg-slate-900 hover:bg-slate-700 text-white text-sm px-3 py-2">
+        Download JSON
+      </a>
+      <a href="/"
+         class="inline-flex items-center gap-1 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 text-sm px-3 py-2">
+        New file
+      </a>
+    </div>
+  </div>
+
+  {% set g = metadata.general %}
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="md:col-span-2 space-y-4">
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-2">Article</h2>
+        <div class="text-lg font-semibold text-slate-900">{{ g.articleTitle or "—" }}</div>
+        {% if g.subtitle %}<div class="text-slate-600 mt-1">{{ g.subtitle }}</div>{% endif %}
+        <div class="text-sm text-slate-500 mt-2">
+          {{ g.journalTitle or "—" }}
+          {% if g.volume %} · Vol. {{ g.volume }}{% endif %}
+          {% if g.issue %} · No. {{ g.issue }}{% endif %}
+          {% if g.firstPage and g.lastPage %} · pp. {{ g.firstPage }}–{{ g.lastPage }}{% endif %}
+        </div>
+        <div class="flex flex-wrap gap-2 mt-3 text-xs">
+          {% if g.articleId %}<span class="rounded-full bg-indigo-50 text-indigo-700 px-2 py-1">DOI: {{ g.articleId }}</span>{% endif %}
+          {% if g.issnPrint %}<span class="rounded-full bg-slate-100 text-slate-600 px-2 py-1">p-ISSN: {{ g.issnPrint }}</span>{% endif %}
+          {% if g.issnOnline %}<span class="rounded-full bg-slate-100 text-slate-600 px-2 py-1">e-ISSN: {{ g.issnOnline }}</span>{% endif %}
+          {% if g.articleType %}<span class="rounded-full bg-emerald-50 text-emerald-700 px-2 py-1">{{ g.articleType }}</span>{% endif %}
+        </div>
+      </div>
+
+      {% if g.abstract %}
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-2">Abstract</h2>
+        <p class="text-sm text-slate-700 leading-relaxed">{{ g.abstract }}</p>
+      </div>
+      {% endif %}
+
+      {% if g.keywords %}
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-2">Keywords</h2>
+        <div class="flex flex-wrap gap-2">
+          {% for k in g.keywords %}
+          <span class="rounded-full bg-amber-50 text-amber-800 text-xs px-2.5 py-1 border border-amber-100">{{ k }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-3">Authors</h2>
+        {% if metadata.authorForm %}
+        <ul class="divide-y divide-slate-100">
+          {% for a in metadata.authorForm %}
+          <li class="py-2.5">
+            <div class="font-medium text-slate-800">
+              {{ a.name or "—" }}
+              {% if a.corresp %}<span class="ml-1 text-xs text-indigo-600">(corresponding)</span>{% endif %}
+            </div>
+            {% if a.affiliations %}
+            <div class="text-sm text-slate-500">{{ a.affiliations|join(" · ") }}</div>
+            {% endif %}
+            <div class="text-xs text-slate-400 mt-0.5 flex flex-wrap gap-3">
+              {% if a.email %}<span>✉ {{ a.email }}</span>{% endif %}
+              {% if a.orcid %}<span>ORCID: {{ a.orcid }}</span>{% endif %}
+              {% if a.country %}<span>{{ a.country }}</span>{% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-sm text-slate-400">No authors detected.</p>
+        {% endif %}
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-2">Raw JSON</h2>
+        <pre class="text-xs bg-slate-900 text-slate-100 rounded-lg p-4 overflow-auto max-h-[480px]">{{ metadata_json }}</pre>
+      </div>
+    </div>
+
+    <aside class="space-y-4">
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-3">Dates</h2>
+        <dl class="text-sm space-y-2">
+          {% for label, key in [("Received","receivedDate"), ("Revised","revisedDate"), ("Accepted","acceptedDate"), ("Published","publicationDate")] %}
+            {% set d = metadata.dateForm.get(key) %}
+            <div class="flex justify-between">
+              <dt class="text-slate-500">{{ label }}</dt>
+              <dd class="text-slate-700">
+                {% if d and d.year %}{{ "%04d-%02d-%02d"|format(d.year, d.month, d.day) }}{% else %}—{% endif %}
+              </dd>
+            </div>
+          {% endfor %}
+        </dl>
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-3">Publisher</h2>
+        <div class="text-sm text-slate-700">{{ metadata.publisherForm.name or "—" }}</div>
+        {% if metadata.publisherForm.location %}
+        <div class="text-xs text-slate-500">{{ metadata.publisherForm.location }}</div>
+        {% endif %}
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-3">License &amp; Copyright</h2>
+        <div class="text-sm text-slate-700">{{ metadata.permissionForm.copyrightStatement or "—" }}</div>
+        {% if metadata.permissionForm.licenseUrl %}
+        <a href="{{ metadata.permissionForm.licenseUrl }}" target="_blank" rel="noreferrer"
+           class="text-xs text-indigo-600 hover:underline break-all">{{ metadata.permissionForm.licenseUrl }}</a>
+        {% endif %}
+        {% if metadata.permissionForm.openAccessLicense %}
+        <div class="mt-2"><span class="rounded-full bg-emerald-50 text-emerald-700 text-xs px-2 py-0.5 border border-emerald-100">Open Access</span></div>
+        {% endif %}
+      </div>
+
+      <div class="bg-white rounded-xl border border-slate-200 p-5">
+        <h2 class="text-xs uppercase tracking-wider text-slate-500 mb-3">Identifiers</h2>
+        <dl class="text-xs space-y-1.5">
+          <div class="flex justify-between"><dt class="text-slate-500">UID</dt><dd class="text-slate-700 truncate ml-2">{{ g.uid }}</dd></div>
+          <div class="flex justify-between"><dt class="text-slate-500">Article URL</dt><dd class="text-slate-700 truncate ml-2">{{ g.articleUrl or "—" }}</dd></div>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</section>
+{% endblock %}

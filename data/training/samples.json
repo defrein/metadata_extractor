@@ -1,0 +1,86 @@
+[
+  {
+    "tokens": [
+      "Journal", "of", "Health", "and", "Food", "Sciences",
+      "This", "is", "Article", "Title",
+      "Def", "Reinhard", ",", "Avian", "Renohardian",
+      "Departement", "of", "Tech", ",", "University", "of", "Indonesia", ",", "Indonesia",
+      "Abstract", "This", "study", "investigates", "the", "relationship", "between", "diet", "and", "metabolic", "health", ".",
+      "Keywords", ":", "Health", ",", "Food"
+    ],
+    "labels": [
+      "JOURNAL", "JOURNAL", "JOURNAL", "JOURNAL", "JOURNAL", "JOURNAL",
+      "TITLE", "TITLE", "TITLE", "TITLE",
+      "AUTHOR", "AUTHOR", "OTHER", "AUTHOR", "AUTHOR",
+      "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL",
+      "OTHER", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "OTHER",
+      "OTHER", "OTHER", "KEYWORD", "OTHER", "KEYWORD"
+    ],
+    "layout": {
+      "size_per_token": [
+        14, 14, 14, 14, 14, 14,
+        20, 20, 20, 20,
+        12, 12, 11, 12, 12,
+        10, 10, 10, 10, 10, 10, 10, 10, 10,
+        11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11,
+        10, 10, 10, 10, 10
+      ]
+    }
+  },
+  {
+    "tokens": [
+      "International", "Journal", "of", "Computer", "Science",
+      "Deep", "Learning", "Methods", "for", "Image", "Classification",
+      "John", "Smith", ",", "Jane", "Doe",
+      "Department", "of", "Computer", "Science", ",", "MIT", ",", "USA",
+      "Abstract", "We", "propose", "a", "novel", "deep", "learning", "method", ".",
+      "Keywords", ":", "Deep", "Learning", ",", "Computer", "Vision"
+    ],
+    "labels": [
+      "JOURNAL", "JOURNAL", "JOURNAL", "JOURNAL", "JOURNAL",
+      "TITLE", "TITLE", "TITLE", "TITLE", "TITLE", "TITLE",
+      "AUTHOR", "AUTHOR", "OTHER", "AUTHOR", "AUTHOR",
+      "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL",
+      "OTHER", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "OTHER",
+      "OTHER", "OTHER", "KEYWORD", "KEYWORD", "OTHER", "KEYWORD", "KEYWORD"
+    ],
+    "layout": {
+      "size_per_token": [
+        14, 14, 14, 14, 14,
+        18, 18, 18, 18, 18, 18,
+        12, 12, 11, 12, 12,
+        10, 10, 10, 10, 10, 10, 10, 10,
+        11, 11, 11, 11, 11, 11, 11, 11, 11,
+        10, 10, 10, 10, 10, 10, 10
+      ]
+    }
+  },
+  {
+    "tokens": [
+      "Jurnal", "Teknologi", "Informasi",
+      "Analisis", "Data", "Menggunakan", "Machine", "Learning",
+      "Budi", "Santoso", ",", "Siti", "Aminah",
+      "Fakultas", "Teknik", ",", "Universitas", "Indonesia", ",", "Indonesia",
+      "Abstrak", "Penelitian", "ini", "membahas", "penerapan", "machine", "learning", ".",
+      "Kata", "kunci", ":", "machine", "learning", ",", "data"
+    ],
+    "labels": [
+      "JOURNAL", "JOURNAL", "JOURNAL",
+      "TITLE", "TITLE", "TITLE", "TITLE", "TITLE",
+      "AUTHOR", "AUTHOR", "OTHER", "AUTHOR", "AUTHOR",
+      "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL", "AFFIL",
+      "OTHER", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "ABSTRACT", "OTHER",
+      "OTHER", "OTHER", "OTHER", "KEYWORD", "KEYWORD", "OTHER", "KEYWORD"
+    ],
+    "layout": {
+      "size_per_token": [
+        14, 14, 14,
+        18, 18, 18, 18, 18,
+        12, 12, 11, 12, 12,
+        10, 10, 10, 10, 10, 10, 10,
+        11, 11, 11, 11, 11, 11, 11, 11,
+        10, 10, 10, 10, 10, 10, 10
+      ]
+    }
+  }
+]

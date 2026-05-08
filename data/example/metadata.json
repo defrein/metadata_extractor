@@ -1,0 +1,123 @@
+{
+    "general": {
+        "uid": "",
+        "issue": "2",
+        "volume": "21",
+        "keywords": [
+            "Health",
+            "Food"
+        ],
+        "lastPage": "190",
+        "firstPage": "134",
+        "subtitle": "This is Subtitle",
+        "articleId": "10.20452/wiitm.2025.17940",
+        "issnPrint": "1111-1122",
+        "issueYear": "1",
+        "articleUrl": "https://doi.org/10.20452/wiitm.2025.17940",
+        "categories": [
+            {
+                "subject": "Computer Science",
+                "subjectGroup": []
+            }
+        ],
+        "issnOnline": "1111-1111",
+        "issueTitle": "Special Issue on Genomics",
+        "articleType": "research-article",
+        "articleTitle": "This is Article Title",
+        "journalTitle": "This is Journal Title",
+        "abbrevJournalTitle": "TJT"
+    },
+    "dateForm": {
+        "revisedDate": {
+            "day": 23,
+            "year": 2026,
+            "month": 4
+        },
+        "acceptedDate": {
+            "day": 21,
+            "year": 2026,
+            "month": 4
+        },
+        "receivedDate": {
+            "day": 22,
+            "year": 2026,
+            "month": 4
+        },
+        "publicationDate": {
+            "day": 22,
+            "year": 2026,
+            "month": 4,
+            "publicationFormat": "electronic"
+        },
+        "issuePublicationDate": {
+            "day": 22,
+            "year": 2026,
+            "month": 4,
+            "publicationFormat": "electronic"
+        }
+    },
+    "authorForm": [
+        {
+            "id": "author-2",
+            "name": "Def Reinhard",
+            "email": "",
+            "orcid": "",
+            "phone": "",
+            "scopus": "",
+            "corresp": false,
+            "country": "",
+            "affiliations": [
+                "Departement of Tech, University of Indonesia, Indonesia"
+            ]
+        },
+        {
+            "id": "author-3",
+            "name": "Avian Renohardian",
+            "email": "",
+            "orcid": "",
+            "phone": "",
+            "scopus": "",
+            "corresp": false,
+            "country": "",
+            "affiliations": [
+                "Departement of Art, University of Indonesia, Indonesia"
+            ]
+        }
+    ],
+    "editorForm": [
+        {
+            "id": "editor-1",
+            "name": "",
+            "email": "",
+            "orcid": "",
+            "phone": "",
+            "scopus": "",
+            "country": "",
+            "affiliations": []
+        }
+    ],
+    "reviewerForm": [
+        {
+            "id": "reviewer-1",
+            "name": "",
+            "email": "",
+            "orcid": "",
+            "phone": "",
+            "scopus": "",
+            "country": "",
+            "affiliations": []
+        }
+    ],
+    "publisherForm": {
+        "name": "Universitas Airlangga",
+        "location": "Poland"
+    },
+    "permissionForm": {
+        "licenseUrl": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+        "copyrightYear": "2024",
+        "copyrightHolder": "Airlangga Journal of Innovation Management",
+        "openAccessLicense": true,
+        "copyrightStatement": "Copyright © 2024 The Author(s).",
+        "licenseInformation": "This is an Open Access article distributed under the terms of the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0), which permits non-commercial use, distribution, and reproduction in any medium, provided the original author and source are credited, and any adaptations are shared under the same terms."
+    }
+}
